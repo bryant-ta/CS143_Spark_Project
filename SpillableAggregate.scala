@@ -179,22 +179,28 @@ case class SpillableAggregate(
           val curGroup = groupingProjection(curRow)
           // work as hashmap
           var curBuffer = currentAggregationTable(curGroup)
+
+
           // not in hashTable
           if (curBuffer == null) {
             // check the size of AggregationTable
+            curBuffer = newAggregatorInstance()
             if(CS143Utils.maybeSpill(currentAggregationTable,memorySize)){
-              spillRecord(curGroup,curRow)
+              spillRecord(curGroup, curRow)
             }else {
-              curBuffer = newAggregatorInstance()
-              currentAggregationTable.update(curGroup, curBuffer)
+
+              currentAggregationTable.update(curGroup.copy(), curBuffer)
+              curBuffer.update(curRow)
             }
-          }
+          }else curBuffer.update(curRow)
 
-          for (i <- 0 to (numPartitions-1)){
-            spills(i).closePartition()
-          }
 
-          curBuffer.update(curRow)
+          // curBuffer.update(curRow)
+
+//          for (i <- 0 to (numPartitions-1)){
+//            spills(i).closePartition()
+//          }
+
         }
         // result ++ groupingattributes ?
         val inputSchema = Seq(aggregatorSchema) ++ namedGroups.map(_._2)
@@ -206,15 +212,35 @@ case class SpillableAggregate(
         *
         * @return
         */
-      private def spillRecord(group: Row, row: Row)
-      =
-      {
+      private def spillRecord(group:Row, row: Row) = {
         /* IMPLEMENT THIS METHOD */
         val joinedRow = new JoinedRow4(row,group)
-        val index = joinedRow.hashCode() % spills.size
+//                val index = joinedRow.hashCode() % spills.size
+        val index = groupingProjection(row).hashCode() % numPartitions
         spills(index).insert(joinedRow)
 
       }
+
+      private def fetchSpill(): Boolean  = {
+        false
+        // IMPLEMENT ME
+//        // get row iterator of next Non-Empty partition
+//        while (!data.hasNext && partitionIterator.hasNext) {
+//          val thispartition = partitionIterator.next()
+//          data = thispartition.getData()
+//        }
+//
+//        if (!data.hasNext) {
+//          false
+//        }
+//        else {
+//
+//          // clear Aggregation Table and aggregateResult
+//          currentAggregationTable = new SizeTrackingAppendOnlyMap[Row, AggregateFunction]
+//          aggregateResult = aggregate()
+        }
+
+
     }
   }
 }
