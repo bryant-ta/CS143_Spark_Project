@@ -188,11 +188,10 @@ case class SpillableAggregate(
             if(CS143Utils.maybeSpill(currentAggregationTable,memorySize)){
               spillRecord(curGroup, curRow)
             }else {
-
-              currentAggregationTable.update(curGroup.copy(), curBuffer)
-              curBuffer.update(curRow)
+              currentAggregationTable.update(curGroup, curBuffer)
             }
-          }else curBuffer.update(curRow)
+          }
+          curBuffer.update(curRow)
 
 
           // curBuffer.update(curRow)
