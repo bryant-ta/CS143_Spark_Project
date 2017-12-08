@@ -216,8 +216,8 @@ case class SpillableAggregate(
         /* IMPLEMENT THIS METHOD */
         val joinedRow = new JoinedRow4(row,group)
 //                val index = joinedRow.hashCode() % spills.size
-        val index = groupingProjection(row).hashCode() % numPartitions
-        spills(index).insert(joinedRow)
+        val index = group.hashCode() % numPartitions
+        spills(index).insert(row)
 
       }
 
