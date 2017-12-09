@@ -139,18 +139,14 @@ private[sql] class DiskPartition (
         if (currentIterator.hasNext) {
           currentIterator.next()
         }
-        else if(chunkSizeIterator.hasNext) {
-          fetchNextChunk()
-          currentIterator.next()
-        }
-       else{
+        else{
           throw new NoSuchElementException("data ended")
        }
       }
 
       override def hasNext() = {
         /* IMPLEMENT THIS METHOD */
-        if(chunkSizeIterator.hasNext || currentIterator.hasNext){
+        if(currentIterator.hasNext ||fetchNextChunk()){
           true
         }
         else{
